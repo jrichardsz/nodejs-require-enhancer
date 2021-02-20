@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var finder = require('find-package-json');
+var Module = require('module');
+var originalRequire = Module.prototype.require;
 
 var cacheRootPaths = {};
 var cacheModulePaths = {};
@@ -47,8 +49,7 @@ function getAppRootDirectory(callerLocation) {
 
 function getCalleeInfo() {
   var stack = new Error().stack.split("at ");
-
-  var functionInfo = "" + stack[3].trim();
+  var functionInfo = "" + stack[4].trim();
   var fileLocation = functionInfo.substring(functionInfo.indexOf("(") + 1, functionInfo.indexOf(":"));
   var lineInfo = functionInfo.split(":");
   return {
@@ -56,3 +57,44 @@ function getCalleeInfo() {
     line: lineInfo[1]
   };
 }
+
+Module.prototype.require = function(){
+  var callerLocation;
+  if(cacheModulePaths[arguments['0']]){
+    callerLocation = cacheModulePaths[arguments['0']];
+  }else{
+    callerLocation = getCalleeInfo().location;
+    cacheModulePaths[arguments['0']] = callerLocation;
+  }  
+
+  var rootPath;
+  if(cacheRootPaths[callerLocation]){
+    rootPath = cacheRootPaths[callerLocation]
+  }else{
+    rootPath = getAppRootDirectory(callerLocation)
+    cacheRootPaths[callerLocation] = rootPath;
+  }
+  
+  var initialPath = arguments['0'];
+  var fullPath;
+  try{
+    fullPath = path.join(rootPath,"src","main", initialPath);
+    arguments['0'] = fullPath;
+    return originalRequire.apply(this, arguments);
+  }catch(err1){
+    if(process.env.NODE_REQUIRE_ENHANCER_LOG_LEVEL === "debug"){
+      console.log(err1);      
+    }
+    try{
+      fullPath = path.join(rootPath,"src","test", initialPath);
+      arguments['0'] = fullPath;
+      return originalRequire.apply(this, arguments);
+    }catch(err2){
+      if(process.env.NODE_REQUIRE_ENHANCER_LOG_LEVEL === "debug"){
+        console.log(err2);      
+      }
+      arguments['0'] = initialPath;
+      return originalRequire.apply(this, arguments);
+    }
+  }
+};
