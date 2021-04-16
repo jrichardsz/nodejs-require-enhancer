@@ -8,31 +8,31 @@ var cacheRootPaths = {};
 var cacheModulePaths = {};
 
 module.exports = function(filePath, scope, disableMavenStructure) {
- 
+
   var callerLocation;
-  if(cacheModulePaths[filePath]){
+  if (cacheModulePaths[filePath]) {
     callerLocation = cacheModulePaths[filePath];
-  }else{
+  } else {
     callerLocation = getCalleeInfo().location;
     cacheModulePaths[filePath] = callerLocation;
-  }  
+  }
 
   var rootPath;
-  if(cacheRootPaths[callerLocation]){
+  if (cacheRootPaths[callerLocation]) {
     rootPath = cacheRootPaths[callerLocation]
-  }else{
+  } else {
     rootPath = getAppRootDirectory(callerLocation)
     cacheRootPaths[callerLocation] = rootPath;
   }
-  
-  if(typeof disableMavenStructure === 'undefined' || disableMavenStructure === false){
+
+  if (typeof disableMavenStructure === 'undefined' || disableMavenStructure === false) {
     if (scope === 'test') {
       rootPath += "/src/test";
     } else {
       rootPath += "/src/main";
-    }     
+    }
   }
-  
+
   var fullPath = path.join(rootPath, filePath);
 
   if (!fs.existsSync(fullPath) && !fs.existsSync(fullPath + '.js')) {
@@ -58,43 +58,51 @@ function getCalleeInfo() {
   };
 }
 
-Module.prototype.require = function(){
-  var callerLocation;
-  if(cacheModulePaths[arguments['0']]){
-    callerLocation = cacheModulePaths[arguments['0']];
-  }else{
-    callerLocation = getCalleeInfo().location;
-    cacheModulePaths[arguments['0']] = callerLocation;
-  }  
+Module.prototype.require = function() {
 
-  var rootPath;
-  if(cacheRootPaths[callerLocation]){
-    rootPath = cacheRootPaths[callerLocation]
-  }else{
-    rootPath = getAppRootDirectory(callerLocation)
-    cacheRootPaths[callerLocation] = rootPath;
-  }
-  
-  var initialPath = arguments['0'];
-  var fullPath;
-  try{
-    fullPath = path.join(rootPath,"src","main", initialPath);
-    arguments['0'] = fullPath;
+  try {
     return originalRequire.apply(this, arguments);
-  }catch(err1){
-    if(process.env.NODE_REQUIRE_ENHANCER_LOG_LEVEL === "debug"){
-      console.log(err1);      
+  } catch (err) {
+    if(err.code !== 'MODULE_NOT_FOUND'){
+      throw err;
     }
-    try{
-      fullPath = path.join(rootPath,"src","test", initialPath);
+    var callerLocation;
+    if (cacheModulePaths[arguments['0']]) {
+      callerLocation = cacheModulePaths[arguments['0']];
+    } else {
+      callerLocation = getCalleeInfo().location;
+      cacheModulePaths[arguments['0']] = callerLocation;
+    }
+
+    var rootPath;
+    if (cacheRootPaths[callerLocation]) {
+      rootPath = cacheRootPaths[callerLocation]
+    } else {
+      rootPath = getAppRootDirectory(callerLocation)
+      cacheRootPaths[callerLocation] = rootPath;
+    }
+
+    var initialPath = arguments['0'];
+    var fullPath;
+    try {
+      fullPath = path.join(rootPath, "src", "main", initialPath);
       arguments['0'] = fullPath;
+      // log(arguments);
       return originalRequire.apply(this, arguments);
-    }catch(err2){
-      if(process.env.NODE_REQUIRE_ENHANCER_LOG_LEVEL === "debug"){
-        console.log(err2);      
+    } catch (err1) {
+      if(err1.code !== 'MODULE_NOT_FOUND'){
+        throw err1;
       }
-      arguments['0'] = initialPath;
-      return originalRequire.apply(this, arguments);
+      try {
+        fullPath = path.join(rootPath, "src", "test", initialPath);
+        arguments['0'] = fullPath;
+        return originalRequire.apply(this, arguments);
+      } catch (err2) {
+        if(err2.code !== 'MODULE_NOT_FOUND'){
+          throw err2;
+        }
+        throw new Error(`${initialPath} was not found as npm module, neither in ${rootPath}/src/main nor in ${rootPath}/src/test`);
+      }
     }
   }
 };

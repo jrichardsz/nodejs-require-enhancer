@@ -1,18 +1,18 @@
 # Node.js Require Enhancer
 
-# Installation
+# Question
 
-```
-npm install nodejs-require-enhancer --save
-```
-
-# Question 
-
-How to make node.js require absolute instead of relative ?
+How to make an easy require instead of ../../../ ?
 
 # Answer
 
-Use this library, and you could use simple absolute paths relative to the application root
+Use this library, and you could use simple paths relative to the application root, like java & maven
+
+# Installation
+
+```
+npm install jrichardsz/nodejs-require-enhancer#master --save
+```
 
 # Usage
 
@@ -21,7 +21,7 @@ If you have this folder structure
 ├── package.json
 └── src
     ├── main
-    │   ├── 
+    │   ├──
     │   └── org
     │       └── acme
     │           ├── context
@@ -29,25 +29,30 @@ If you have this folder structure
     │           ├── core
     │           │   ├── Bar.js
     ├── test
-    │   ├── 
+    │   ├──
     │   └── org
     │       └── acme
     │           ├── context
     │           │   └── FooTest.js
     │           ├── core
     │           │   ├── BarTest.js
-    
+
 ```
 
 
-Instead of use `require('../../../../org/acme/context/Foo.js')` you could use `include('org/acme/context/Foo.js')`
+Instead of use `require('../../../../org/acme/context/Foo.js')` you could use `require('org/acme/context/Foo.js')`
 
 # Sample
 
 First line must be the require of enhancer and after that, you could use **include** instead **require**:
 
 ```
-const include = require('nodejs-require-enhancer');
+require('nodejs-require-enhancer');
+```
+
+After that, import your custom modules with:
+
+```
 const Foo = include('org/acme/context/Foo.js');
 ```
 
@@ -55,15 +60,7 @@ If you want to load modules inside test folder:
 
 
 ```
-const include = require('nodejs-require-enhancer');
-const Foo = include('org/acme/context/FooTest.js','test');
+const Foo = include('org/acme/context/FooTest.js');
 ```
 
-# Disable maven structure
-
-As you can see this library needs the src/main and src/test folders. If you want to use it without this structure, use the following code:
-
-```
-const include = require('nodejs-require-enhancer', null, false);
-const Foo = include('/my/own/structure/Foo.js','test');
-```
+That's all!
