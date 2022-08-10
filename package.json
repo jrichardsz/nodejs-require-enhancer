@@ -1,6 +1,6 @@
 {
   "name": "nodejs-require-enhancer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,6 @@
   "author": "https://github.com/jrichardsz",
   "license": "MIT",
   "dependencies": {
-    "find-package-json": "^1.2.0"
+    
   }
 }
