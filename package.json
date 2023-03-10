@@ -1,14 +1,27 @@
 {
   "name": "nodejs-require-enhancer",
-  "version": "1.0.2",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "https://github.com/jrichardsz",
+  "description": "Simple way to avoid the relative paths at require or load your OWN modules",
+  "version": "1.0.0",
+  "author": "JRichardsz <jrichardsz.java@gmail.com>",
+  "contributors": [
+    "JRichardsz <jrichardsz.java@gmail.com>"
+  ],
   "license": "MIT",
+  "repository": "https://github.com/jrichardsz/nodejs-require-enhancer",
+  "homepage": "https://github.com/jrichardsz/nodejs-require-enhancer",
+  "keywords": [""
+  ],
+  "engines": {
+    "node": ">= 14.0.0"
+  },
+  "files": [
+    "readme.md",
+    "index.js"
+  ],
+  "scripts": {
+  },
   "dependencies": {
-    
-  }
+  },
+  "devDependencies": {
+  }  
 }
